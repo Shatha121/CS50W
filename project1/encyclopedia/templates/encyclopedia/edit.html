@@ -1,0 +1,18 @@
+{% extends "encyclopedia/layout.html" %}
+{% block title %}
+    Edit {{ title }}
+{% endblock %}
+{% block body %}
+    <h2 style="padding-left: 50px;">Edit: {{ title }}</h2>
+    <br>
+    {% if error %}
+        <p style="color: red; padding-left:29.5%;">{{ error }}</p>
+    {% endif %}
+    <br>
+    <form method="POST">
+        {% csrf_token %}
+        <textarea name="edit_content" style="margin-left:16.8%; width:680px; height:350px; justify-content: center;" placeholder="Enter the Markdown content for the page">{{ content }}</textarea>
+        <br>
+        <input type="submit" name="submit" value="Save Changes" style="margin-left:35%; background-color: #008CBA; border-style: none; border-radius: 15px; padding:10px; color:white;">
+    </form>
+{% endblock %}

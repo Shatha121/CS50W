@@ -1,0 +1,29 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Encyclopedia
+{% endblock %}
+
+{% block body %}
+
+    
+
+    <h2 style="padding-left: 50px;">Create a new entry</h2>
+    <br>
+    {% if Error %}
+        <p style="color: red; padding-left:29.5%;">{{ Error }}</p>
+    {% endif %}
+    <br>
+    <form method="POST">
+        {% csrf_token %}
+        <label style="display:flex; padding-left: 230px;">Title: <input type="text" name="add_title" id="Title"></label>
+        <br>
+        <textarea name="add_content" style="margin-left:16.8%; width:680px; height:350px; justify-content: center;" placeholder="Enter the Markdown content for the page"></textarea>
+
+        <br>
+        <input type="submit" name="submit" value="Submit" style="margin-left:35%; background-color: #008CBA; border-style: none; border-radius: 15px; padding:10px; color:white;">
+
+    </form>
+    
+
+{% endblock %}
