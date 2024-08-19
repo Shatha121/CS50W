@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect
 import random
 from . import util
-from . import forms
-from django.core.files import File
-from django.contrib import messages
-from django.urls import reverse
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
