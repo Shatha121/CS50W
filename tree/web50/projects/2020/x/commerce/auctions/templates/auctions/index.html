@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2 style="margin-top: 20px; margin-left: 50px;">Active Listings</h2>
+    <hr>
+    <br>
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        {% for auction in auctions %}
+            <a href="{% url 'list' auction.id %}" style="text-decoration: none; color: inherit;">
+                <div style="display: flex; align-items: center; margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; width: 80%; max-width: 800px;">
+                    {% if auction.item_image %}
+                        <img src="{{ auction.item_image.url }}" alt="{{ auction.name }}" style="width: 150px; height: auto; margin-right: 20px;">
+                    {% endif %}
+                    <div>
+                        <h3>{{ auction.name }}</h3>
+                        <p>{{ auction.description }}</p>
+                        <p><strong>Price:</strong> ${{ auction.starting_bid }}</p>
+                        <p><strong>Created at:</strong> {{ auction.created_at }}</p>
+                        <p><strong>Duration:</strong> {{ auction.duration }} hours</p>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2 style="margin-top: 20px; margin-left: 50px;">Your Watchlist</h2>
+    <hr>
+    <br>
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        {% if watchlist %}
+            {% for watch in watchlist %}
+                <a href="{% url 'list' watch.auction_listing.id %}" style="text-decoration: none; color: inherit;">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; width: 80%; max-width: 800px;">
+                        {% if watch.auction_listing.item_image %}
+                            <img src="{{ watch.auction_listing.item_image.url }}" alt="{{ watch.auction_listing.name }}" style="width: 150px; height: auto; margin-right: 20px;">
+                        {% endif %}
+                        <div>
+                            <h3>{{ watch.auction_listing.name }}</h3>
+                            <p>{{ watch.auction_listing.description|slice:":100" }}...</p>
+                            <p><strong>Price:</strong> ${{ watch.auction_listing.starting_bid }}</p>
+                            <p><strong>Created at:</strong> {{ watch.auction_listing.created_at }}</p>
+                            <p><strong>Duration:</strong> {{ watch.auction_listing.duration }} hours</p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <p>Your watchlist is empty.</p>
+        {% endif %}
+    </div>
+{% endblock %}

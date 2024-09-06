@@ -1,0 +1,49 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>Posts from Users You Follow</h1>
+    
+    {% if user.is_authenticated %}
+        <div>
+            <h4>New Post</h4>
+            <form method="post" action="{% url 'index' %}" id="new-post-form" >
+                {% csrf_token %}
+                <textarea id="textarea" name="content" rows="4" cols="50" class="form-control mb-2"></textarea>
+                <input class="btn btn-primary" type="submit" value="Post">
+            </form>
+        </div>
+        <hr>
+    {% endif %}
+
+    {% for post in page_obj %}
+    <div class="post">
+        <h5><a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a></h5>
+        <p>{{ post.content }}</p>
+        <p class="text-muted">{{ post.timestamp }}</p>
+        <p><strong>❤️ {{ post.liked_by.count }}</strong></p>
+    </div>
+    <hr>
+    {% endfor %}
+
+    <div class="pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}

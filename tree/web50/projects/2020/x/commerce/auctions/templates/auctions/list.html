@@ -1,0 +1,111 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if messages %}
+        <div style="display: flex; justify-content: center; text-align: center; margin-top: 20px;">
+            <ul class="messages" style="list-style-type: none; padding: 0; margin: 0;">
+                {% for message in messages %}
+                    <li class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div style="display: flex; flex-direction: column; align-items: center; margin: 20px auto; padding: 20px; width: 80%; max-width: 800px; border: 1px solid #ddd; border-radius: 8px;">
+        {% if auction.item_image %}
+            <img src="{{ auction.item_image.url }}" alt="{{ auction.name }}" style="width: 150px; height: auto; margin-bottom: 20px; border-radius: 8px;">
+        {% endif %}
+        <div style="width: 100%;">
+            <h3 style="text-align: center;">{{ auction.name }}</h3>
+            <p><strong>Description:</strong> {{ auction.description }}</p>
+            <p><strong>Starting Price:</strong> ${{ auction.starting_bid }}</p>
+            <p><strong>Created at:</strong> {{ auction.created_at }}</p>
+            <p><strong>Duration:</strong> {{ auction.duration }} hours</p>
+            {% if highest_bid %}
+                <p><strong>Highest Bid:</strong> ${{ highest_bid }}</p>
+            {% endif %}
+            {% if auction.category %}
+                <p><strong>Category:</strong> {{ auction.category }}</p>
+            {% endif %}
+            {% if auction.seller %}
+                <p><strong>Seller:</strong> {{ auction.seller.username }}</p>
+            {% endif %}
+            {% if auction.winner %}
+                <p><strong>Winner:</strong> {{ auction.winner.username }}</p>
+            {% endif %}
+            
+            {% if user.is_authenticated %}
+                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                    {% if user == auction.seller %}
+                        {% if not is_closed %}
+                            <form action="{% url 'close_auction' auction.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Close Auction</button>
+                            </form>
+                        {% else %}
+                            <p>This auction is closed.</p>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if not is_in_watchlist %}
+                        <form action="{% url 'add_to_watchlist' auction.id %}" method="post" style="margin-left: 10px;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Add to Watchlist</button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'remove_from_watchlist' auction.id %}" method="post" style="margin-left: 10px;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning">Remove from Watchlist</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p style="text-align: center; margin-top: 20px;"><a href="{% url 'login' %}">Log in</a> to manage your watchlist.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        {% if not is_closed %}
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 20px auto; padding: 20px; width: 80%; max-width: 800px;">
+                <h4 style="text-align: center; margin-top: 40px;">Place a Bid</h4>
+                <form action="{% url 'list' auction.id %}" method="post" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+                    {% csrf_token %}
+                    {{ bid_form.amount }}
+                    <button type="submit" style="margin-top: 10px;" class="btn btn-primary">Place Bid</button>
+                </form>
+            </div>
+        {% else %}
+            <p style="text-align: center; margin-top: 20px;">This auction is closed. No more bids can be placed.</p>
+        {% endif %}
+    {% else %}
+        <p style="text-align: center;"><a href="{% url 'login' %}">Log in</a> to place a bid.</p>
+    {% endif %}
+
+    <section style="width: 80%; max-width: 800px; margin: 20px auto;">
+        <h4 style="text-align: center; margin-bottom: 20px;">Comments</h4>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 100%; border-top: 1px solid #ddd; padding-top: 10px;">
+                {% for comment in comments %}
+                    <div style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+                        <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }} <em>({{ comment.created_at }})</em></p>
+                    </div>
+                {% empty %}
+                    <p>No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+                <form action="{% url 'add_comment' auction.id %}" method="post" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+                    {% csrf_token %}
+                    <textarea name="comment" rows="4" cols="50" placeholder="Add a comment..." required style="width: 100%; max-width: 500px; margin-bottom: 10px;"></textarea>
+                    <button type="submit" class="btn btn-secondary">Post Comment</button>
+                </form>
+            {% else %}
+                <p style="text-align: center;"><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

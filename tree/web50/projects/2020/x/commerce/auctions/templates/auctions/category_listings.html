@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2 class="mb-4">{{ category.name }} Listings</h2>
+        {% if listings %}
+            <ul class="list-group">
+                {% for listing in listings %}
+                    <li class="list-group-item">
+                        <a href="{% url 'list' listing.id %}" class="text-decoration-none">
+                            {{ listing.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info mt-3" role="alert">
+                No active listings in this category.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

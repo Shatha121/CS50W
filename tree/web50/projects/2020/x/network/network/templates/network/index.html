@@ -1,0 +1,138 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>All Posts</h1>
+    
+    {% if user.is_authenticated %}
+        <div>
+            <h4>New Post</h4>
+            <form method="post" action="{% url 'index' %}" id="new-post-form">
+                {% csrf_token %}
+                <textarea id="textarea" name="content" rows="4" cols="50" class="form-control mb-2"></textarea>
+                <input class="btn btn-primary" type="submit" value="Post">
+            </form>
+        </div>
+        <hr>
+    {% endif %}
+
+    {% for post in page_obj %}
+    <div class="post" id="post-{{ post.id }}">
+        <h5><a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a></h5>
+        <p class="post-content">{{ post.content }}</p>
+        <div class="edit-container" style="display: none;">
+            <textarea class="form-control">{{ post.content }}</textarea>
+            <button class="btn btn-primary save-button">Save</button>
+        </div>
+        <p class="text-muted">{{ post.timestamp }}</p>
+        <p>
+            <button class="btn btn-light like-button" data-post-id="{{ post.id }}">
+                {% if user in post.liked_by.all %}
+                    Unlike
+                {% else %}
+                    Like
+                {% endif %}
+            </button>
+            <strong>❤️ <span class="like-count">{{ post.liked_by.count }}</span></strong>
+        </p>
+        {% if post.user == user %}
+        <button class="btn btn-secondary edit-button" data-post-id="{{ post.id }}">Edit</button>
+        {% endif %}
+    </div>
+    <hr>
+    {% endfor %}
+
+    <div class="pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.like-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const postId = this.getAttribute('data-post-id');
+                    const likeCountSpan = this.nextElementSibling.querySelector('.like-count');
+
+                    fetch(`/post/${postId}/like`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (data.liked) {
+                                this.textContent = 'Unlike';
+                            } else {
+                                this.textContent = 'Like';
+                            }
+                            likeCountSpan.textContent = data.like_count;
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const postId = this.getAttribute('data-post-id');
+                    const postDiv = document.getElementById(`post-${postId}`);
+                    const postContent = postDiv.querySelector('.post-content');
+                    const editContainer = postDiv.querySelector('.edit-container');
+                    
+                    postContent.style.display = 'none';
+                    editContainer.style.display = 'block';
+                });
+            });
+
+            document.querySelectorAll('.save-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const postDiv = this.closest('.post');
+                    const postId = postDiv.getAttribute('id').split('-')[1];
+                    const newContent = postDiv.querySelector('.edit-container textarea').value;
+
+                    fetch(`/post/${postId}/edit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: new URLSearchParams({
+                            'content': newContent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            postDiv.querySelector('.post-content').textContent = data.new_content;
+                            postDiv.querySelector('.post-content').style.display = 'block';
+                            postDiv.querySelector('.edit-container').style.display = 'none';
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}
